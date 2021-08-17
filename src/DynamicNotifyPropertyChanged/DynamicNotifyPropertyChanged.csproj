@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>default</LangVersion>
+        <Nullable>enable</Nullable>
+        <Title>DynamicNotifyPropertyChanged</Title>
+        <Authors>Mihails Popovs</Authors>
+        <Description>Dynamically create object that implement INotifyPropertChanged and raise event when property gets changed.</Description>
+        <RepositoryUrl>https://github.com/Feroks/DynamicNotifyPropertyChanged</RepositoryUrl>
+        <PackageTags>IL INotifyPropertyChanged Dynamic</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+      <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+    </ItemGroup>
+
+</Project>
