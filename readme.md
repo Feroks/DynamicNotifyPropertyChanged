@@ -1,4 +1,4 @@
-![Nuget](https://img.shields.io/nuget/v/DynamicNotifyPropertyChanged)
+[![Nuget](https://img.shields.io/nuget/v/DynamicNotifyPropertyChanged)](https://www.nuget.org/packages/DynamicNotifyPropertyChanged/)
 
 This library allows you to create types at runtime that implement `INotifyPropertyChanged` interface. Each property calls `OnPropertyChanged` when its value is changed.
 
