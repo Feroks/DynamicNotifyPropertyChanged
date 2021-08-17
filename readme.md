@@ -1,4 +1,6 @@
-﻿This library allows you to create types at runtime that implement `INotifyPropertyChanged` interface. Each property calls `OnPropertyChanged` when its value is changed.
+![Nuget](https://img.shields.io/nuget/v/DynamicNotifyPropertyChanged)
+
+This library allows you to create types at runtime that implement `INotifyPropertyChanged` interface. Each property calls `OnPropertyChanged` when its value is changed.
 
 ## Creating Type
 Dynamic class can be created by calling:
