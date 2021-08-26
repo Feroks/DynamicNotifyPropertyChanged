@@ -10,7 +10,6 @@ namespace DynamicNotifyPropertyChanged
 	/// </summary>
 	public abstract class BaseNotifyPropertyChangedClass : INotifyPropertyChanging, INotifyPropertyChanged
 	{
-		private readonly ConcurrentQueue<string> _pendingChangingNotifications = new();
 		private readonly ConcurrentQueue<string> _pendingChangedNotifications = new();
 		private bool _suspendNotifications;
 		private bool _suspendRaisePropertyChangingNotifications;
@@ -23,22 +22,27 @@ namespace DynamicNotifyPropertyChanged
 		/// <summary>
 		/// Suspend <see cref="PropertyChanging"/> and <see cref="PropertyChanged"/> until disposed.
 		/// </summary>
-		/// <returns><see cref="IDisposable"/> that enables and fires <see cref="PropertyChanged"/> and <see cref="PropertyChanging"/> notifications after <see cref="IDisposable.Dispose"/> is called.</returns>
-		public IDisposable SuspendNotifications()
+		/// <param name="raisePropertyChangedOnDispose">True, if <see cref="PropertyChanged"/> should be called for each changed property when <see cref="IDisposable.Dispose"/> is called.</param>
+		/// <returns><see cref="IDisposable"/> that enables <see cref="PropertyChanging"/> and <see cref="PropertyChanged"/> notifications <see cref="IDisposable.Dispose"/> is called and raises <see cref="PropertyChanged"/> for each changed property.</returns>
+		public IDisposable SuspendNotifications(bool raisePropertyChangedOnDispose)
 		{
 			_suspendNotifications = true;
 			return new AnonymousDisposable(() =>
 			{
 				_suspendNotifications = false;
 
-				if (!_suspendRaisePropertyChangingNotifications)
+				if (_suspendRaisePropertyChangedNotifications)
 				{
-					RaisePendingChangingNotifications();
+					return;
 				}
 
-				if (!_suspendRaisePropertyChangedNotifications)
+				if (raisePropertyChangedOnDispose)
 				{
 					RaisePendingChangedNotifications();
+				}
+				else
+				{
+					ClearPendingChangedNotifications();
 				}
 			});
 		}
@@ -46,46 +50,44 @@ namespace DynamicNotifyPropertyChanged
 		/// <summary>
 		/// Suspend <see cref="PropertyChanging"/> until disposed.
 		/// </summary>
-		/// <returns><see cref="IDisposable"/> that enables and fires <see cref="PropertyChanging"/> notifications after <see cref="IDisposable.Dispose"/> is called.</returns>
+		/// <returns><see cref="IDisposable"/> that enables <see cref="PropertyChanging"/> notifications after <see cref="IDisposable.Dispose"/> is called.</returns>
 		public IDisposable SuspendPropertyChangingNotifications()
 		{
 			_suspendRaisePropertyChangingNotifications = true;
-			return new AnonymousDisposable(() =>
-			{
-				_suspendRaisePropertyChangingNotifications = false;
-
-				if (!_suspendNotifications)
-				{
-					RaisePendingChangingNotifications();
-				}
-			});
+			return new AnonymousDisposable(() => _suspendRaisePropertyChangingNotifications = false);
 		}
 
 		/// <summary>
 		/// Suspend <see cref="PropertyChanged"/> until disposed.
 		/// </summary>
-		/// <returns><see cref="IDisposable"/> that enables and fires <see cref="PropertyChanged"/> notifications after <see cref="IDisposable.Dispose"/> is called.</returns>
-		public IDisposable SuspendPropertyChangedNotifications()
+		/// <param name="raisePropertyChangedOnDispose">True, if <see cref="PropertyChanged"/> should be called for each changed property when <see cref="IDisposable.Dispose"/> is called.</param>
+		/// <returns><see cref="IDisposable"/> that enables and raises <see cref="PropertyChanged"/> notifications after <see cref="IDisposable.Dispose"/> is called.</returns>
+		public IDisposable SuspendPropertyChangedNotifications(bool raisePropertyChangedOnDispose)
 		{
 			_suspendRaisePropertyChangedNotifications = true;
 			return new AnonymousDisposable(() =>
 			{
 				_suspendRaisePropertyChangedNotifications = false;
 
-				if (!_suspendNotifications)
+				if (_suspendNotifications)
+				{
+					return;
+				}
+
+				if (raisePropertyChangedOnDispose)
 				{
 					RaisePendingChangedNotifications();
+				}
+				else
+				{
+					ClearPendingChangedNotifications();
 				}
 			});
 		}
 
 		protected void OnPropertyChanging(string propertyName)
 		{
-			if (_suspendRaisePropertyChangingNotifications || _suspendNotifications)
-			{
-				_pendingChangingNotifications.Enqueue(propertyName);
-			}
-			else
+			if (!_suspendRaisePropertyChangingNotifications && !_suspendNotifications)
 			{
 				PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
 			}
@@ -103,24 +105,25 @@ namespace DynamicNotifyPropertyChanged
 			}
 		}
 
-		private void RaisePendingChangingNotifications()
+		private void ClearPendingChangedNotifications()
 		{
-			RaisePendingNotifications(_pendingChangingNotifications, OnPropertyChanging);
+#if NETSTANDARD2_1
+			_pendingChangedNotifications.Clear();
+#else
+			while (_pendingChangedNotifications.TryDequeue(out _))
+			{
+			}
+#endif
 		}
 
 		private void RaisePendingChangedNotifications()
 		{
-			RaisePendingNotifications(_pendingChangedNotifications, OnPropertyChanged);
-		}
-
-		private static void RaisePendingNotifications(ConcurrentQueue<string> queue, Action<string> callback)
-		{
-			// Trigger in sequence and avoid firing multiple times for same property.
+			// Raise in sequence and avoid firing multiple times for same property.
 			var properties = new HashSet<string>();
-			while (queue.TryDequeue(out var propertyName) && !properties.Contains(propertyName))
+			while (_pendingChangedNotifications.TryDequeue(out var propertyName) && !properties.Contains(propertyName))
 			{
 				properties.Add(propertyName);
-				callback(propertyName);
+				OnPropertyChanged(propertyName);
 			}
 		}
 	}

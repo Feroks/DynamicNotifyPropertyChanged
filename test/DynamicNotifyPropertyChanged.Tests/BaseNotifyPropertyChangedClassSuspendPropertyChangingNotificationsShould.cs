@@ -27,7 +27,7 @@ namespace DynamicNotifyPropertyChanged.Tests
 			var isEventRaised = false;
 
 			var fixture = new SuspendNotificationTestClass();
-			fixture.SuspendNotifications();
+			fixture.SuspendNotifications(true);
 			using (fixture.SuspendPropertyChangingNotifications())
 			{
 				fixture.PropertyChanging += (_, _) => isEventRaised = true;
@@ -42,7 +42,7 @@ namespace DynamicNotifyPropertyChanged.Tests
 		}
 
 		[Fact]
-		public void RaisePropertyChangingAfterDisposed()
+		public void NotRaisePendingPropertyChangingAfterDisposed()
 		{
 			var isEventRaised = false;
 
@@ -55,11 +55,11 @@ namespace DynamicNotifyPropertyChanged.Tests
 
 			isEventRaised
 				.Should()
-				.BeTrue();
+				.BeFalse();
 		}
-
+		
 		[Fact]
-		public void RaisePropertyChangingAfterDisposedOnlyOnce()
+		public void RaisePropertyChangingAfterDisposed()
 		{
 			var callCount = 0;
 
@@ -68,8 +68,8 @@ namespace DynamicNotifyPropertyChanged.Tests
 			{
 				fixture.PropertyChanging += (_, _) => ++callCount;
 				fixture.Value = 1;
-				fixture.Value = 2;
 			}
+			fixture.Value = 2;
 
 			callCount
 				.Should()
