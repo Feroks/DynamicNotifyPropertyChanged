@@ -26,7 +26,8 @@ namespace DynamicNotifyPropertyChanged
 			var objectParameter = Expression.Parameter(typeof(object), "source");
 			var convert = Expression.Convert(objectParameter, objectType);
 			var property = Expression.Property(convert, propertyName);
-			var lambda = Expression.Lambda<Func<object, object>>(property, objectParameter);
+			var convertProperty = Expression.Convert(property, typeof(object));
+			var lambda = Expression.Lambda<Func<object, object?>>(convertProperty, objectParameter);
 
 			return lambda.Compile();
 		}
