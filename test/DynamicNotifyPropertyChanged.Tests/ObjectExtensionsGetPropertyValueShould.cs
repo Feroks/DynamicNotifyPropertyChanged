@@ -8,7 +8,8 @@ namespace DynamicNotifyPropertyChanged.Tests
 	{
 		private readonly TestClass _model = new()
 		{
-			Value = "My Value"
+			Value = "My Value",
+			NullableBool = false
 		};
 
 		[Fact]
@@ -20,7 +21,17 @@ namespace DynamicNotifyPropertyChanged.Tests
 				.Should()
 				.Be(_model.Value);
 		}
+		
+		[Fact]
+		public void CastValueToObject()
+		{
+			var value = _model.GetPropertyValue<bool?>(nameof(TestClass.NullableBool));
 
+			value
+				.Should()
+				.Be(_model.NullableBool);
+		}
+		
 		[Fact]
 		public void ThrowExceptionIfPropertyNotFound()
 		{

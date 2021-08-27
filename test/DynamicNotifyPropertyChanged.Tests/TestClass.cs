@@ -2,6 +2,8 @@
 {
 	public class TestClass
 	{
-		public string Value { get; set; }
+		public string? Value { get; set; }
+		
+		public bool? NullableBool { get; set; }
 	}
 }
