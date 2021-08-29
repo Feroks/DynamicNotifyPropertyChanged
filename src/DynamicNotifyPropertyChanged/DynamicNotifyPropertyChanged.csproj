@@ -9,11 +9,19 @@
         <Description>Dynamically create object that implement INotifyPropertChanged and raise event when property gets changed.</Description>
         <RepositoryUrl>https://github.com/Feroks/DynamicNotifyPropertyChanged</RepositoryUrl>
         <PackageTags>IL INotifyPropertyChanged Dynamic</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
-      <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Reflection.Emit" Version="4.7.0"/>
+        <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0"/>
     </ItemGroup>
 
 </Project>
