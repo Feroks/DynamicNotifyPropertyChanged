@@ -17,12 +17,14 @@ namespace DynamicNotifyPropertyChanged
 	[SuppressMessage("ReSharper", "ForCanBeConvertedToForeach", Justification = "Performance")]
 	public static class DynamicNotifyPropertyChangedClassFactory
 	{
+		private const string OnPropertyChangingName = "OnPropertyChanging";
 		private const string OnPropertyChangedName = "OnPropertyChanged";
 		private static readonly DynamicPropertyComparer DynamicPropertyComparer = new();
 		private static readonly ConcurrentDictionary<string, Lazy<Type>> TypeCache = new();
 		private static readonly ConcurrentDictionary<Type, Lazy<Func<object>>> InitializationCache = new();
 		private static readonly ConstructorInfo ObjectCtor;
 		private static readonly Type BaseClassType;
+		private static readonly MethodInfo OnPropertyChangingMethodInfo;
 		private static readonly MethodInfo OnPropertyChangedMethodInfo;
 		private static readonly ModuleBuilder ModuleBuilder;
 		private static int _index;
@@ -31,6 +33,10 @@ namespace DynamicNotifyPropertyChanged
 		{
 			ObjectCtor = typeof(object).GetConstructor(Type.EmptyTypes)!;
 			BaseClassType = typeof(BaseNotifyPropertyChangedClass);
+			
+			OnPropertyChangingMethodInfo = BaseClassType.GetMethod(
+				OnPropertyChangingName,
+				BindingFlags.Instance | BindingFlags.NonPublic)!;
 			OnPropertyChangedMethodInfo = BaseClassType.GetMethod(
 				OnPropertyChangedName,
 				BindingFlags.Instance | BindingFlags.NonPublic)!;
@@ -90,7 +96,7 @@ namespace DynamicNotifyPropertyChanged
 			var constructor = typeBuilder.DefineConstructor(
 				MethodAttributes.Public,
 				CallingConventions.Standard,
-				null);
+				Type.EmptyTypes);
 
 			var ilConstructor = constructor.GetILGenerator();
 			ilConstructor.Emit(OpCodes.Ldarg_0);
@@ -114,7 +120,7 @@ namespace DynamicNotifyPropertyChanged
 					propertyName,
 					PropertyAttributes.None,
 					propertyType,
-					null);
+					Type.EmptyTypes);
 
 				// Getter
 				var getterBuilder = typeBuilder.DefineMethod(
@@ -137,12 +143,27 @@ namespace DynamicNotifyPropertyChanged
 					new[] { propertyType });
 
 				var ilSetter = setterBuilder.GetILGenerator();
+				
+				// Property Changing
+				if (property.RaisePropertyChanging)
+				{
+					ilSetter.Emit(OpCodes.Ldarg_0);
+					ilSetter.Emit(OpCodes.Ldstr, propertyName);
+					ilSetter.Emit(OpCodes.Callvirt, OnPropertyChangingMethodInfo);
+				}
+				
+				// Property value set
 				ilSetter.Emit(OpCodes.Ldarg_0);
 				ilSetter.Emit(OpCodes.Ldarg_1);
 				ilSetter.Emit(OpCodes.Stfld, fieldBuilder);
-				ilSetter.Emit(OpCodes.Ldarg_0);
-				ilSetter.Emit(OpCodes.Ldstr, propertyName);
-				ilSetter.Emit(OpCodes.Callvirt, OnPropertyChangedMethodInfo);
+				
+				// Property Changed
+				if (property.RaisePropertyChanged)
+				{
+					ilSetter.Emit(OpCodes.Ldarg_0);
+					ilSetter.Emit(OpCodes.Ldstr, propertyName);
+					ilSetter.Emit(OpCodes.Callvirt, OnPropertyChangedMethodInfo);
+				}
 				ilSetter.Emit(OpCodes.Ret);
 
 				propertyBuilder.SetSetMethod(setterBuilder);
@@ -156,7 +177,7 @@ namespace DynamicNotifyPropertyChanged
 			var dynamicMethod = new DynamicMethod(
 				string.Empty,
 				type,
-				null,
+				Type.EmptyTypes,
 				ModuleBuilder);
 
 			ILGenerator ilDynamicMethod = dynamicMethod.GetILGenerator();
@@ -183,7 +204,12 @@ namespace DynamicNotifyPropertyChanged
 			for (var i = 0; i < properties.Length; i++)
 			{
 				var property = properties[i];
-				sb.AppendFormat("{0}~{1}|", property.Name, property.Type.FullName);
+				sb.AppendFormat(
+					"{0}~{1}_{2}_{3}|",
+					property.Name,
+					property.Type.FullName,
+					property.RaisePropertyChanging.ToString(),
+					property.RaisePropertyChanged.ToString());
 			}
 
 			return sb.ToString();
