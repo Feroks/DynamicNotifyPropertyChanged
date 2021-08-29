@@ -1,6 +1,6 @@
 [![Nuget](https://img.shields.io/nuget/v/DynamicNotifyPropertyChanged)](https://www.nuget.org/packages/DynamicNotifyPropertyChanged/)
 
-This library allows you to create types at runtime that implement `INotifyPropertyChanged` interface. Each property calls `OnPropertyChanged` when its value is changed.
+This library allows you to create types at runtime that implement `INotifyPropertyChanging` and `INotifyPropertyChanged` interfaces. Each property calls `OnPropertyChanging` and `OnPropertyChanged` in its setter.
 
 ## Creating Type
 Dynamic class can be created by calling:
@@ -8,11 +8,16 @@ Dynamic class can be created by calling:
 Type DynamicNotifyPropertyChangedClassFactory.CreateType(DynamicProperty[] properties)
 ```
 
-`DynamicProperty` contains two properties:
+`DynamicProperty` contains following properties:
 - Name
 - Type
+- RaisePropertyChanging
+- RaisePropertyChanged
 
-You must ensure that **duplicate properties are not present**. Created type is cached. If you pass same set of dynamic properties (even in different order) new type will not be created.
+By default both `OnPropertyChanging` and `OnPropertyChanged` are injected into property setter, but you can disable it by changing `RaisePropertyChanging` and `RaisePropertyChanged` values.
+
+You must ensure that **duplicate properties are not present**.
+Created type is cached, e.g. if you pass same set of `DynamicProperty` (even in different order) new type will not be created.
 
 ## Initializing Created Type
 You can create new instance by calling:
