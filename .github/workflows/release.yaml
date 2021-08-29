@@ -28,7 +28,7 @@ jobs:
         run: dotnet restore
       
       - name: Build
-        run: dotnet build --no-restore -c ${{ env.configuration }} /p:Version=${VERSION} /p:ContinuousIntegrationBuild=true
+        run: dotnet build --no-restore -c ${{ env.configuration }} /p:Version=${VERSION}
 
       - name: Test
         run: dotnet test --no-build -c ${{ env.configuration }} /p:Version=${VERSION} --no-build
