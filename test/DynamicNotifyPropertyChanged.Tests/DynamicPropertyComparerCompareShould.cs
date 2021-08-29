@@ -40,5 +40,43 @@ namespace DynamicNotifyPropertyChanged.Tests
 				.Should()
 				.Be(expectedResult);
 		}
+		
+		[Theory]
+		[InlineData(true, false, 1)]
+		[InlineData(false, true, -1)]
+		[InlineData(true, true, 0)]
+		[InlineData(false, false, 0)]
+		public void CompareByRaisePropertyChangedAsFallback(bool raisePropertyChanged1, bool raisePropertyChanged2, int expectedResult)
+		{
+			var fixture = new DynamicPropertyComparer();
+
+			var property1 = new DynamicProperty("Property", typeof(int), raisePropertyChanged1, false);
+			var property2 = new DynamicProperty("Property", typeof(int), raisePropertyChanged2, false);
+
+			var value = fixture.Compare(property1, property2);
+
+			value
+				.Should()
+				.Be(expectedResult);
+		}
+		
+		[Theory]
+		[InlineData(true, false, 1)]
+		[InlineData(false, true, -1)]
+		[InlineData(true, true, 0)]
+		[InlineData(false, false, 0)]
+		public void CompareByRaisePropertyChangingAsFallback(bool raisePropertyChanging1, bool raisePropertyChanging2, int expectedResult)
+		{
+			var fixture = new DynamicPropertyComparer();
+
+			var property1 = new DynamicProperty("Property", typeof(int), false, raisePropertyChanging1);
+			var property2 = new DynamicProperty("Property", typeof(int), false, raisePropertyChanging2);
+
+			var value = fixture.Compare(property1, property2);
+
+			value
+				.Should()
+				.Be(expectedResult);
+		}
 	}
 }

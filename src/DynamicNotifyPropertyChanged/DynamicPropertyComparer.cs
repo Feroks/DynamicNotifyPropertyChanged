@@ -13,11 +13,25 @@ namespace DynamicNotifyPropertyChanged
 		/// <inheritdoc cref="IComparer{T}.Compare"/>.
 		public int Compare(DynamicProperty x, DynamicProperty y)
 		{
-			return string.CompareOrdinal(x.Name, y.Name) switch
+			var value = string.CompareOrdinal(x.Name, y.Name);
+			if (value != 0)
 			{
-				0 => string.CompareOrdinal(x.Type.FullName, y.Type.FullName),
-				var v => v
-			};
+				return value;
+			}
+
+			value = string.CompareOrdinal(x.Type.FullName, y.Type.FullName);
+			if (value != 0)
+			{
+				return value;
+			}
+
+			value = x.RaisePropertyChanged.CompareTo(y.RaisePropertyChanged);
+			if (value != 0)
+			{
+				return value;
+			}
+			
+			return x.RaisePropertyChanging.CompareTo(y.RaisePropertyChanging);
 		}
 	}
 }
