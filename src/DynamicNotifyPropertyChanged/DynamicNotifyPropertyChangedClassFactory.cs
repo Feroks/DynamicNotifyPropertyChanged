@@ -96,7 +96,7 @@ namespace DynamicNotifyPropertyChanged
 			var constructor = typeBuilder.DefineConstructor(
 				MethodAttributes.Public,
 				CallingConventions.Standard,
-				null);
+				Type.EmptyTypes);
 
 			var ilConstructor = constructor.GetILGenerator();
 			ilConstructor.Emit(OpCodes.Ldarg_0);
@@ -120,7 +120,7 @@ namespace DynamicNotifyPropertyChanged
 					propertyName,
 					PropertyAttributes.None,
 					propertyType,
-					null);
+					Type.EmptyTypes);
 
 				// Getter
 				var getterBuilder = typeBuilder.DefineMethod(
@@ -177,7 +177,7 @@ namespace DynamicNotifyPropertyChanged
 			var dynamicMethod = new DynamicMethod(
 				string.Empty,
 				type,
-				null,
+				Type.EmptyTypes,
 				ModuleBuilder);
 
 			ILGenerator ilDynamicMethod = dynamicMethod.GetILGenerator();
