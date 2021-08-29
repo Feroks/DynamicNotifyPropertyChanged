@@ -17,8 +17,8 @@ namespace DynamicNotifyPropertyChanged
 
 		/// <param name="name">Name of the property.</param>
 		/// <param name="type">Type of the property.</param>
-		/// <param name="raisePropertyChanged">True, if <see cref="BaseNotifyPropertyChangedClass.PropertyChanged"/> should be triggered.</param>
-		/// <param name="raisePropertyChanging">True, if <see cref="BaseNotifyPropertyChangedClass.PropertyChanging"/> should be triggered.</param>
+		/// <param name="raisePropertyChanged">True, if <see cref="BaseNotifyPropertyChangedClass.PropertyChanged"/> should be raised.</param>
+		/// <param name="raisePropertyChanging">True, if <see cref="BaseNotifyPropertyChangedClass.PropertyChanging"/> should be raised.</param>
 		public DynamicProperty(string name, Type type, bool raisePropertyChanged, bool raisePropertyChanging)
 		{
 			Name = name;

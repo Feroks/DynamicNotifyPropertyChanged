@@ -6,7 +6,7 @@ using System.ComponentModel;
 namespace DynamicNotifyPropertyChanged
 {
 	/// <summary>
-	/// Empty class that implements <see cref="INotifyPropertyChanged"/> and <see cref="INotifyPropertyChanged"/>.
+	/// Empty class that implements <see cref="INotifyPropertyChanging"/> and <see cref="INotifyPropertyChanged"/>.
 	/// </summary>
 	public abstract class BaseNotifyPropertyChangedClass : INotifyPropertyChanging, INotifyPropertyChanged
 	{
