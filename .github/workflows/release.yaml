@@ -24,11 +24,14 @@ jobs:
       - name: Set VERSION variable from tag
         run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
 
+      - name: Restore
+        run: dotnet restore
+      
       - name: Build
-        run: dotnet build -c ${{ env.configuration }} /p:Version=${VERSION}
+        run: dotnet build --no-restore -c ${{ env.configuration }} /p:Version=${VERSION} /p:ContinuousIntegrationBuild=true
 
       - name: Test
-        run: dotnet test -c ${{ env.configuration }} /p:Version=${VERSION} --no-build
+        run: dotnet test --no-build -c ${{ env.configuration }} /p:Version=${VERSION} --no-build
 
       - name: Pack
         run: dotnet pack --no-build -c ${{ env.configuration }} /p:Version=${VERSION} --output .
