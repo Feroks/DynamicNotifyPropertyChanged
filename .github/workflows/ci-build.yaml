@@ -19,7 +19,7 @@ jobs:
       with:
         dotnet-version: 5.0.x
 
-    - name: Restore dependencies
+    - name: Restore
       run: dotnet restore
 
     - name: Build
@@ -31,7 +31,7 @@ jobs:
     - name: Pack
       run: dotnet pack --no-build -c ${{ env.configuration }}
       
-    - name: Create NuGet Artifacts
+    - name: Upload Artifacts
       uses: actions/upload-artifact@master
       with:
         name: nuget
