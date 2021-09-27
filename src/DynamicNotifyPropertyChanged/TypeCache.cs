@@ -6,14 +6,35 @@ namespace DynamicNotifyPropertyChanged
 {
 	internal static class TypeCache
 	{
-		private static readonly ConcurrentDictionary<Type, Lazy<ConcurrentDictionary<string, Lazy<DynamicObjectGetterSetter>>>> Cache = new();
+		private static readonly ConcurrentDictionary<Type, Lazy<ConcurrentDictionary<string, Lazy<DynamicObjectGetterSetter?>>>> Cache = new();
 
-		internal static Lazy<DynamicObjectGetterSetter> GetObjectGetterSetter(Type type, string propertyName)
+		internal static bool TryGetObjectGetterSetter(Type type, string propertyName, out DynamicObjectGetterSetter? getterSetter)
 		{
-			return Cache
+			getterSetter = Cache
 				.GetOrAdd(type, _ => new(() => new()))
 				.Value
-				.GetOrAdd(propertyName, x => new(() => new(CreateLazyGetter(type, x), CreateLazySetter(type, x))));
+#if NETSTANDARD2_1
+				.GetOrAdd(propertyName, static (x, t) => CreateLazyGetterSetter(t, x), type)
+#else
+				.GetOrAdd(propertyName, x =>  CreateLazyGetterSetter(type, x))
+#endif
+				?.Value;
+
+			return getterSetter != null;
+		}
+
+		internal static DynamicObjectGetterSetter GetObjectGetterSetter(Type type, string propertyName)
+		{
+			return TryGetObjectGetterSetter(type, propertyName, out var getterSetter) && getterSetter != null
+				? getterSetter
+				: throw new ArgumentException("Property not found on type", nameof(propertyName));
+		}
+
+		private static Lazy<DynamicObjectGetterSetter?> CreateLazyGetterSetter(Type type, string propertyName)
+		{
+			return new(() => type.GetProperty(propertyName) != null
+				? new(CreateLazyGetter(type, propertyName), CreateLazySetter(type, propertyName))
+				: null);
 		}
 
 		private static Lazy<Func<object, object?>> CreateLazyGetter(Type type, string propertyName)
