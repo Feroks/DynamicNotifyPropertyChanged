@@ -42,6 +42,7 @@ Alternatively, you can create `Func` that gets property value from object by cal
 ```csharp
 Func<object, object> TypeExtensions.GetPropertyGetter(this Type type, string propertyName)
 ```
+Both methods have `TryGet` pattern alternatives.
 
 ## Setting Property Value
 You can set property value by calling:
@@ -53,6 +54,7 @@ Alternatively, you can create `Func` that sets property value on object by calli
 ```csharp
 Action<object, object> TypeExtensions.GetPropertySetter(this Type type, string propertyName)
 ```
+Both methods have `TryGet` pattern alternatives.
 
 All methods described above use caching and compiled expressions for better performance.
 
