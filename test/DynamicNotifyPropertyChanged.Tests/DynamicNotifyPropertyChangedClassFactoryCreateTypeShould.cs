@@ -208,7 +208,24 @@ namespace DynamicNotifyPropertyChanged.Tests
 				.Should()
 				.Be(type2);
 		}
-		
+
+		[Fact]
+		public void ThrowExceptionIfPropertyIsDefinedMultipleTimes()
+		{
+			var properties = new[]
+			{
+				new DynamicProperty("myProperty", typeof(int)),
+				new DynamicProperty("MYPROPERTY", typeof(int))
+			};
+			
+			Action action = () => DynamicNotifyPropertyChangedClassFactory.CreateType(properties);
+
+			action
+				.Should()
+				.Throw<Exception>()
+				.WithMessage("*unique*");
+		}
+
 		[Fact]
 		public void BeThreadSafe()
 		{

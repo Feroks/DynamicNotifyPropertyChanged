@@ -83,6 +83,9 @@ namespace DynamicNotifyPropertyChanged
 
 		private static Type CreateTypeInternal(IReadOnlyList<DynamicProperty> properties)
 		{
+			// Properties must have unique case insensitive names
+			var createdProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
 			// Name must be unique
 			var index = Interlocked.Increment(ref _index);
 			var name = $"<>f__AnonymousNotifyPropertyChangedType{index.ToString()}";
@@ -108,6 +111,11 @@ namespace DynamicNotifyPropertyChanged
 				var property = properties[i];
 				var propertyName = property.Name;
 				var propertyType = property.Type;
+
+				if (!createdProperties.Add(propertyName))
+				{
+					throw new($"{propertyName} is defined twice. Properties on class must have unique name.");
+				}
 
 				// Backing Field
 				var fieldBuilder = typeBuilder.DefineField(
