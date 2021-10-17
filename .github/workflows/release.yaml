@@ -12,7 +12,7 @@ env:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -44,16 +44,6 @@ jobs:
         id: step_two
         run: |
          echo "${{ env.action_state }}" # This will output 'yellow'
-
-      - name: Set the value !
-        id: step_one
-        run: |
-          $versionA="aaaa"
-
-      - name: Use the value !
-        id: step_two
-        run: |
-         echo "${{ $versionA }}" # This will output 'yellow'
         
       - name: Restore
         run: dotnet restore
