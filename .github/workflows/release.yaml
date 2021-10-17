@@ -24,7 +24,7 @@ jobs:
 #          git branch --remote --contains | grep origin/master
 
       - name: Set VERSION variable from tag
-        run: echo "VERSION=AAAAA"
+        run: echo "VERSION=AAAAA" >> $GITHUB_ENV
 
       - name: Debug version
         run: echo $VERSION
