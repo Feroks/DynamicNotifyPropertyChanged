@@ -33,7 +33,7 @@ jobs:
         run: echo ${VERSION}
 
       - name: Debug version 3
-        run: echo "$VERSION"
+        run: echo ${{ env.VERSION }}
         
       - name: Restore
         run: dotnet restore
