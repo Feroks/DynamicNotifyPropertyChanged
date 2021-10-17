@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
+  pull_request:
+    branches: [ master ]
 
 env:
   configuration: Release
@@ -24,6 +26,15 @@ jobs:
       - name: Set VERSION variable from tag
         run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
 
+      - name: Debug version
+        run: echo $VERSION
+
+      - name: Debug version 2
+        run: echo ${VERSION}
+
+      - name: Debug version 3
+        run: echo "$VERSION"
+        
       - name: Restore
         run: dotnet restore
 
