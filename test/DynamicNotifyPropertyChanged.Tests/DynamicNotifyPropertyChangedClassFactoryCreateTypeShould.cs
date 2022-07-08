@@ -92,7 +92,11 @@ namespace DynamicNotifyPropertyChanged.Tests
 		[Fact]
 		public void NotAddRaisePropertyChangingInSetterIfNotRequested()
 		{
-			var property1 = new DynamicProperty("Property1", typeof(int), true, false);
+			var property1 = new DynamicProperty("Property1", typeof(int))
+			{
+				RaisePropertyChanged = true,
+				RaisePropertyChanging = false
+			};
 			var properties = new[] { property1 };
 
 			var type = DynamicNotifyPropertyChangedClassFactory.CreateType(properties);
@@ -141,7 +145,11 @@ namespace DynamicNotifyPropertyChanged.Tests
 		[Fact]
 		public void NotAddRaisePropertyChangedInSetterIfNotRequested()
 		{
-			var property1 = new DynamicProperty("Property1", typeof(int), false, true);
+			var property1 = new DynamicProperty("Property1", typeof(int))
+			{
+				RaisePropertyChanged = false,
+				RaisePropertyChanging = true
+			};
 			var properties = new[] { property1 };
 
 			var type = DynamicNotifyPropertyChangedClassFactory.CreateType(properties);

@@ -9,7 +9,7 @@ namespace DynamicNotifyPropertyChanged
 	{
 		/// <param name="name">Name of the property.</param>
 		/// <param name="type">Type of the property.</param>
-		public DynamicProperty(string name, Type type) : this(name, type, true, true)
+		public DynamicProperty(string name, Type type)
 		{
 			Name = name;
 			Type = type;
@@ -40,11 +40,11 @@ namespace DynamicNotifyPropertyChanged
 		/// <summary>
 		/// Get if <see cref="BaseNotifyPropertyChangedClass.PropertyChanged"/> should be triggered after property value is changed.
 		/// </summary>
-		public bool RaisePropertyChanged { get; }
+		public bool RaisePropertyChanged { get; set; } = true;
 
 		/// <summary>
 		/// Get if <see cref="BaseNotifyPropertyChangedClass.PropertyChanging"/> should be triggered before property value is changed.
 		/// </summary>
-		public bool RaisePropertyChanging { get; }
+		public bool RaisePropertyChanging { get; set; } = true;
 	}
 }

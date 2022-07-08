@@ -50,8 +50,16 @@ namespace DynamicNotifyPropertyChanged.Tests
 		{
 			var fixture = new DynamicPropertyComparer();
 
-			var property1 = new DynamicProperty("Property", typeof(int), raisePropertyChanged1, false);
-			var property2 = new DynamicProperty("Property", typeof(int), raisePropertyChanged2, false);
+			var property1 = new DynamicProperty("Property", typeof(int))
+			{
+				RaisePropertyChanged = raisePropertyChanged1,
+				RaisePropertyChanging = false
+			};
+			var property2 = new DynamicProperty("Property", typeof(int))
+			{
+				RaisePropertyChanged = raisePropertyChanged2,
+				RaisePropertyChanging = false
+			};
 
 			var value = fixture.Compare(property1, property2);
 
@@ -69,8 +77,16 @@ namespace DynamicNotifyPropertyChanged.Tests
 		{
 			var fixture = new DynamicPropertyComparer();
 
-			var property1 = new DynamicProperty("Property", typeof(int), false, raisePropertyChanging1);
-			var property2 = new DynamicProperty("Property", typeof(int), false, raisePropertyChanging2);
+			var property1 = new DynamicProperty("Property", typeof(int))
+			{
+				RaisePropertyChanged = false,
+				RaisePropertyChanging = raisePropertyChanging1
+			};
+			var property2 = new DynamicProperty("Property", typeof(int))
+			{
+				RaisePropertyChanged = false,
+				RaisePropertyChanging = raisePropertyChanging2
+			};
 
 			var value = fixture.Compare(property1, property2);
 
