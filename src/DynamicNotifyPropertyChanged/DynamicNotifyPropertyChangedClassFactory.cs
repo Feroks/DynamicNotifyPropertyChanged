@@ -22,6 +22,8 @@ namespace DynamicNotifyPropertyChanged
 		private static readonly DynamicPropertyComparer DynamicPropertyComparer = new();
 		private static readonly ConcurrentDictionary<string, Lazy<Type>> TypeCache = new();
 		private static readonly ConcurrentDictionary<Type, Lazy<Func<object>>> InitializationCache = new();
+		private static readonly ConcurrentDictionary<Type, Lazy<ConstructorInfo>> TypeConstructorInfoCache = new();
+		private static readonly ConcurrentDictionary<Type, Lazy<PropertyInfo[]>> TypePropertyInfoCache = new();
 		private static readonly ConstructorInfo ObjectCtor;
 		private static readonly Type BaseClassType;
 		private static readonly MethodInfo OnPropertyChangingMethodInfo;
@@ -130,6 +132,13 @@ namespace DynamicNotifyPropertyChanged
 					propertyType,
 					Type.EmptyTypes);
 
+				// Attributes
+				foreach (var attribute in property.Attributes)
+				{
+					var customAttributeBuilder = CreateCustomAttributeBuilder(attribute);
+					propertyBuilder.SetCustomAttribute(customAttributeBuilder);
+				}
+				
 				// Getter
 				var getterBuilder = typeBuilder.DefineMethod(
 					$"get_{propertyName}",
@@ -178,6 +187,46 @@ namespace DynamicNotifyPropertyChanged
 			}
 
 			return typeBuilder.CreateTypeInfo()?.AsType() ?? throw new ("Failed to create type");
+		}
+
+		private static CustomAttributeBuilder CreateCustomAttributeBuilder(DynamicPropertyAttribute attribute)
+		{
+			var type = attribute.Type;
+			
+			// Constructor
+			var constructor = TypeConstructorInfoCache
+				.GetOrAdd(
+					type,
+					x => new(() => x.GetConstructor(attribute.ConstructorArgsTypes) ?? throw new Exception($"Failed to resolve constructor for {attribute}")))
+				.Value;
+			
+			// Property set
+			var attributeProperties = attribute.Properties;
+			var properties = new PropertyInfo[attributeProperties.Count];
+			var propertyValues = new object[attributeProperties.Count];
+
+			var propertyInfos = attributeProperties.Count > 0
+				? TypePropertyInfoCache
+					.GetOrAdd(
+						type,
+						x => new (() => x.GetProperties(BindingFlags.Public | BindingFlags.Instance)))
+					.Value
+				: Array.Empty<PropertyInfo>();
+
+			for (var i = 0; i < attributeProperties.Count; i++)
+			{
+				var attributeProperty = attributeProperties[i];
+				var propertyInfo = Array.Find(propertyInfos, x => x.Name == attributeProperty.Name) ?? throw new Exception($"Failed to find property: {attributeProperty.Name} on attribute: {attribute.Type}");
+
+				properties[i] = propertyInfo;
+				propertyValues[i] = attributeProperty.Value;
+			}
+
+			return new CustomAttributeBuilder(
+				constructor,
+				attribute.ConstructorArgs,
+				properties,
+				propertyValues);
 		}
 
 		private static Func<object> CreateTypeFactoryInternal(Type type)

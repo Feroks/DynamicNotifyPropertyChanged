@@ -36,6 +36,79 @@ namespace DynamicNotifyPropertyChanged.Tests
 		}
 		
 		[Fact]
+		public void CreateAttributesOnPropertiesWithParameterlessConstructor()
+		{
+			var attribute = new DynamicPropertyAttribute(typeof(TestAttribute));
+			var property = new DynamicProperty("Property1", typeof(int))
+			{
+				Attributes = new []
+				{
+					attribute	
+				}
+			};
+			var type = DynamicNotifyPropertyChangedClassFactory.CreateType(new[] { property });
+
+			type
+				.Should()
+				.HaveProperty(_property1.Type, _property1.Name)
+				.Which
+				.Should()
+				.BeDecoratedWith<TestAttribute>(x => x.Value == null);
+		}
+		
+		[Fact]
+		public void CreateAttributesOnPropertiesWithProperties()
+		{
+			const string propertyValue = "MyValue";
+			var attributeProperty = new DynamicPropertyAttributeProperty(nameof(TestAttribute.Value), propertyValue);
+
+			var attribute = new DynamicPropertyAttribute(typeof(TestAttribute))
+			{
+				Properties = new []
+				{
+					attributeProperty
+				}
+			};
+			var property = new DynamicProperty("Property1", typeof(int))
+			{
+				Attributes = new []
+				{
+					attribute	
+				}
+			};
+			var type = DynamicNotifyPropertyChangedClassFactory.CreateType(new[] { property });
+
+			type
+				.Should()
+				.HaveProperty(_property1.Type, _property1.Name)
+				.Which
+				.Should()
+				.BeDecoratedWith<TestAttribute>(x => x.Value == propertyValue);
+		}
+
+		[Fact]
+		public void CreateAttributesOnPropertiesWithConstructorParameters()
+		{
+			const string description = "MyPropertyDescription";
+			var attribute = new DynamicPropertyAttribute(typeof(TestAttribute), new object?[] { description }, new [] { typeof(string) });
+			var property = new DynamicProperty("Property1", typeof(int))
+			{
+				Attributes = new []
+				{
+					attribute	
+				}
+			};
+			var type = DynamicNotifyPropertyChangedClassFactory.CreateType(new[] { property });
+
+			type
+				.Should()
+				.HaveProperty(_property1.Type, _property1.Name)
+				.Which
+				.Should()
+				.BeDecoratedWith<TestAttribute>(x => x.Value == description);
+		}
+
+		[Fact]
 		public void CreateClassThatInheritsINotifyPropertyChanged()
 		{
 			var type = DynamicNotifyPropertyChangedClassFactory.CreateType(Array.Empty<DynamicProperty>());

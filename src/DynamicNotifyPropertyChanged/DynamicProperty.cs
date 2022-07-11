@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DynamicNotifyPropertyChanged
 {
@@ -13,18 +14,6 @@ namespace DynamicNotifyPropertyChanged
 		{
 			Name = name;
 			Type = type;
-		}
-
-		/// <param name="name">Name of the property.</param>
-		/// <param name="type">Type of the property.</param>
-		/// <param name="raisePropertyChanged">True, if <see cref="BaseNotifyPropertyChangedClass.PropertyChanged"/> should be raised.</param>
-		/// <param name="raisePropertyChanging">True, if <see cref="BaseNotifyPropertyChangedClass.PropertyChanging"/> should be raised.</param>
-		public DynamicProperty(string name, Type type, bool raisePropertyChanged, bool raisePropertyChanging)
-		{
-			Name = name;
-			Type = type;
-			RaisePropertyChanged = raisePropertyChanged;
-			RaisePropertyChanging = raisePropertyChanging;
 		}
 
 		/// <summary>
@@ -46,5 +35,10 @@ namespace DynamicNotifyPropertyChanged
 		/// Get if <see cref="BaseNotifyPropertyChangedClass.PropertyChanging"/> should be triggered before property value is changed.
 		/// </summary>
 		public bool RaisePropertyChanging { get; set; } = true;
+
+		/// <summary>
+		/// Get list of attributes associated with the property.
+		/// </summary>
+		public IReadOnlyCollection<DynamicPropertyAttribute> Attributes { get; set; } = Array.Empty<DynamicPropertyAttribute>();
 	}
 }
