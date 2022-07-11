@@ -11,7 +11,7 @@ namespace DynamicNotifyPropertyChanged
 		internal static bool TryGetObjectGetterSetter(Type type, string propertyName, out DynamicObjectGetterSetter? getterSetter)
 		{
 			getterSetter = Cache
-				.GetOrAdd(type, _ => new(() => new()))
+				.GetOrAdd(type, static _ => new(() => new()))
 				.Value
 #if NETSTANDARD2_1
 				.GetOrAdd(propertyName, static (x, t) => CreateLazyGetterSetter(t, x), type)
@@ -28,6 +28,11 @@ namespace DynamicNotifyPropertyChanged
 			return TryGetObjectGetterSetter(type, propertyName, out var getterSetter) && getterSetter != null
 				? getterSetter
 				: throw new ArgumentException("Property not found on type", nameof(propertyName));
+		}
+
+		internal static void Clear()
+		{
+			Cache.Clear();
 		}
 
 		private static Lazy<DynamicObjectGetterSetter?> CreateLazyGetterSetter(Type type, string propertyName)
