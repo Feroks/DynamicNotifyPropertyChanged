@@ -43,7 +43,7 @@ namespace DynamicNotifyPropertyChanged.Tests
 			{
 				Attributes = new []
 				{
-					attribute	
+					attribute
 				}
 			};
 			var type = DynamicNotifyPropertyChangedClassFactory.CreateType(new[] { property });
@@ -73,7 +73,7 @@ namespace DynamicNotifyPropertyChanged.Tests
 			{
 				Attributes = new []
 				{
-					attribute	
+					attribute
 				}
 			};
 			var type = DynamicNotifyPropertyChangedClassFactory.CreateType(new[] { property });
@@ -95,7 +95,7 @@ namespace DynamicNotifyPropertyChanged.Tests
 			{
 				Attributes = new []
 				{
-					attribute	
+					attribute
 				}
 			};
 			var type = DynamicNotifyPropertyChangedClassFactory.CreateType(new[] { property });

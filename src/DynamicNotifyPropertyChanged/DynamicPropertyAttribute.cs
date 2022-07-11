@@ -47,6 +47,6 @@ namespace DynamicNotifyPropertyChanged
 		/// <summary>
 		/// Collection of property setters for attribute.
 		/// </summary>
-		public IReadOnlyList<DynamicPropertyAttributeProperty> Properties { get; set; } = Array.Empty<DynamicPropertyAttributeProperty>();
+		public DynamicPropertyAttributeProperty[] Properties { get; set; } = Array.Empty<DynamicPropertyAttributeProperty>();
 	}
 }

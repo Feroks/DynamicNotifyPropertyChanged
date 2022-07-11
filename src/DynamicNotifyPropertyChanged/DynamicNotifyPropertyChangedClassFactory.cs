@@ -20,9 +20,11 @@ namespace DynamicNotifyPropertyChanged
 		private const string OnPropertyChangingName = "OnPropertyChanging";
 		private const string OnPropertyChangedName = "OnPropertyChanged";
 		private static readonly DynamicPropertyComparer DynamicPropertyComparer = new();
+		private static readonly DynamicPropertyAttributeComparer DynamicPropertyAttributeComparer = new();
+		private static readonly DynamicPropertyAttributePropertyComparer DynamicPropertyAttributePropertyComparer = new();
 		private static readonly ConcurrentDictionary<string, Lazy<Type>> DynamicTypeCache = new();
 		private static readonly ConcurrentDictionary<Type, Lazy<Func<object>>> InitializationCache = new();
-		private static readonly ConcurrentDictionary<Type, Lazy<ConstructorInfo>> TypeConstructorInfoCache = new();
+		private static readonly ConcurrentDictionary<string, Lazy<ConstructorInfo>> TypeConstructorInfoCache = new();
 		private static readonly ConcurrentDictionary<Type, Lazy<PropertyInfo[]>> TypePropertyInfoCache = new();
 		private static readonly ConstructorInfo ObjectCtor;
 		private static readonly Type BaseClassType;
@@ -208,16 +210,16 @@ namespace DynamicNotifyPropertyChanged
 			// Constructor
 			var constructor = TypeConstructorInfoCache
 				.GetOrAdd(
-					type,
-					x => new(() => x.GetConstructor(attribute.ConstructorArgsTypes) ?? throw new Exception($"Failed to resolve constructor for {attribute}")))
+					CreateKey(attribute),
+					_ => new(() => type.GetConstructor(attribute.ConstructorArgsTypes) ?? throw new Exception($"Failed to resolve constructor for {attribute}")))
 				.Value;
 			
 			// Property set
 			var attributeProperties = attribute.Properties;
-			var properties = new PropertyInfo[attributeProperties.Count];
-			var propertyValues = new object[attributeProperties.Count];
+			var properties = new PropertyInfo[attributeProperties.Length];
+			var propertyValues = new object[attributeProperties.Length];
 
-			var propertyInfos = attributeProperties.Count > 0
+			var propertyInfos = attributeProperties.Length > 0
 				? TypePropertyInfoCache
 					.GetOrAdd(
 						type,
@@ -225,7 +227,7 @@ namespace DynamicNotifyPropertyChanged
 					.Value
 				: Array.Empty<PropertyInfo>();
 
-			for (var i = 0; i < attributeProperties.Count; i++)
+			for (var i = 0; i < attributeProperties.Length; i++)
 			{
 				var attributeProperty = attributeProperties[i];
 				var propertyInfo = Array.Find(propertyInfos, x => x.Name == attributeProperty.Name) ?? throw new Exception($"Failed to find property: {attributeProperty.Name} on attribute: {attribute.Type}");
@@ -265,11 +267,10 @@ namespace DynamicNotifyPropertyChanged
 
 		private static string CreateKey(DynamicProperty[] properties)
 		{
-			// Apply sort to avoid creating different type with identical properties in different order
-			Array.Sort(properties, DynamicPropertyComparer);
-
 			var sb = new StringBuilder();
 
+			// Apply sort to avoid creating different type with identical properties in different order
+			Array.Sort(properties, DynamicPropertyComparer);
 			for (var i = 0; i < properties.Length; i++)
 			{
 				var property = properties[i];
@@ -279,6 +280,45 @@ namespace DynamicNotifyPropertyChanged
 					property.Type.FullName,
 					property.RaisePropertyChanging.ToString(),
 					property.RaisePropertyChanged.ToString());
+				
+				Array.Sort(property.Attributes, DynamicPropertyAttributeComparer);
+				for (var j = 0; j < property.Attributes.Length; j++)
+				{
+					var attribute = property.Attributes[j];
+					sb.AppendFormat("|Attribute_{0}", attribute.Type.FullName);
+					
+					// Do not sort, because order is important for constructor arguments
+					for (var k = 0; k < attribute.ConstructorArgsTypes.Length; k++)
+					{
+						var argType = attribute.ConstructorArgsTypes[k];
+						var arg = attribute.ConstructorArgs[k];
+						sb.AppendFormat("|AttributeConstructorArg_{0}_{1}", argType.FullName, arg);
+					}
+
+					Array.Sort(attribute.Properties, DynamicPropertyAttributePropertyComparer);
+					for (var k = 0; k < attribute.Properties.Length; k++)
+					{
+						var attributeProperty = attribute.Properties[k];
+						sb.AppendFormat("|AttributeProperty_{0}_{1}", attributeProperty.Name, attributeProperty.Value);
+					}
+				}
+
+				sb.Append('|');
+			}
+
+			return sb.ToString();
+		}
+		
+		private static string CreateKey(DynamicPropertyAttribute attribute)
+		{
+			var sb = new StringBuilder(attribute.Type.FullName);
+
+			// Do not sort, because order is important for constructor arguments
+			for (var i = 0; i < attribute.ConstructorArgsTypes.Length; i++)
+			{
+				var argType = attribute.ConstructorArgsTypes[i];
+				var arg = attribute.ConstructorArgs[i];
+				sb.AppendFormat("_{0}_{1}|", argType.FullName, arg);
 			}
 
 			return sb.ToString();
