@@ -188,7 +188,7 @@ namespace DynamicNotifyPropertyChanged
 				Type.EmptyTypes,
 				ModuleBuilder);
 
-			ILGenerator ilDynamicMethod = dynamicMethod.GetILGenerator();
+			var ilDynamicMethod = dynamicMethod.GetILGenerator();
 			ilDynamicMethod.Emit(OpCodes.Newobj, type.GetConstructor(Type.EmptyTypes)!);
 			ilDynamicMethod.Emit(OpCodes.Ret);
 
