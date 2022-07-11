@@ -22,6 +22,5 @@
 		/// Value of the property.
 		/// </summary>
 		public object Value { get; }
-	
 	}
 }
