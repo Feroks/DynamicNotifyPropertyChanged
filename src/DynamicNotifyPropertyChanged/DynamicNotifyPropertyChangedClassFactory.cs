@@ -198,7 +198,7 @@ namespace DynamicNotifyPropertyChanged
 		private static Func<object> GetTypeFactory(Type type)
 		{
 			return InitializationCache
-				.GetOrAdd(type, x => new(() => CreateTypeFactoryInternal(x)))
+				.GetOrAdd(type, static x => new(() => CreateTypeFactoryInternal(x)))
 				.Value;
 		}
 

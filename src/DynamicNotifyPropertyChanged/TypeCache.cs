@@ -11,7 +11,7 @@ namespace DynamicNotifyPropertyChanged
 		internal static bool TryGetObjectGetterSetter(Type type, string propertyName, out DynamicObjectGetterSetter? getterSetter)
 		{
 			getterSetter = Cache
-				.GetOrAdd(type, _ => new(() => new()))
+				.GetOrAdd(type, static _ => new(() => new()))
 				.Value
 #if NETSTANDARD2_1
 				.GetOrAdd(propertyName, static (x, t) => CreateLazyGetterSetter(t, x), type)
