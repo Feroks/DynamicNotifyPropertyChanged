@@ -20,7 +20,7 @@ namespace DynamicNotifyPropertyChanged
 		private const string OnPropertyChangingName = "OnPropertyChanging";
 		private const string OnPropertyChangedName = "OnPropertyChanged";
 		private static readonly DynamicPropertyComparer DynamicPropertyComparer = new();
-		private static readonly ConcurrentDictionary<string, Lazy<Type>> TypeCache = new();
+		private static readonly ConcurrentDictionary<string, Lazy<Type>> DynamicTypeCache = new();
 		private static readonly ConcurrentDictionary<Type, Lazy<Func<object>>> InitializationCache = new();
 		private static readonly ConcurrentDictionary<Type, Lazy<ConstructorInfo>> TypeConstructorInfoCache = new();
 		private static readonly ConcurrentDictionary<Type, Lazy<PropertyInfo[]>> TypePropertyInfoCache = new();
@@ -58,7 +58,7 @@ namespace DynamicNotifyPropertyChanged
 		/// <returns>Dynamically created type that implements <see cref="INotifyPropertyChanged"/>.</returns>
 		public static Type CreateType(DynamicProperty[] properties)
 		{
-			return TypeCache
+			return DynamicTypeCache
 				.GetOrAdd(CreateKey(properties), _ => new(() => CreateTypeInternal(properties)))
 				.Value;
 		}
@@ -187,6 +187,18 @@ namespace DynamicNotifyPropertyChanged
 			}
 
 			return typeBuilder.CreateTypeInfo()?.AsType() ?? throw new ("Failed to create type");
+		}
+		
+		/// <summary>
+		/// Clear all cached data.
+		/// </summary>
+		public static void ClearCache()
+		{
+			DynamicTypeCache.Clear();
+			InitializationCache.Clear();
+			TypeConstructorInfoCache.Clear();
+			TypePropertyInfoCache.Clear();
+			TypeCache.Clear();
 		}
 
 		private static CustomAttributeBuilder CreateCustomAttributeBuilder(DynamicPropertyAttribute attribute)

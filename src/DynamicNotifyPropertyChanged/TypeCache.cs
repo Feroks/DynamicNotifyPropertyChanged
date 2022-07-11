@@ -30,6 +30,11 @@ namespace DynamicNotifyPropertyChanged
 				: throw new ArgumentException("Property not found on type", nameof(propertyName));
 		}
 
+		internal static void Clear()
+		{
+			Cache.Clear();
+		}
+
 		private static Lazy<DynamicObjectGetterSetter?> CreateLazyGetterSetter(Type type, string propertyName)
 		{
 			return new(() => type.GetProperty(propertyName) != null
