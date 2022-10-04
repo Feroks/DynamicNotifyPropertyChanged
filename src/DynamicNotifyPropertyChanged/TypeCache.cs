@@ -6,18 +6,15 @@ namespace DynamicNotifyPropertyChanged
 {
 	internal static class TypeCache
 	{
-		private static readonly ConcurrentDictionary<Type, Lazy<ConcurrentDictionary<string, Lazy<DynamicObjectGetterSetter?>>>> Cache = new();
+		private static readonly ConcurrentDictionary<Type, Lazy<ConcurrentDictionary<PropertyKey, Lazy<DynamicObjectGetterSetter?>>>> Cache = new();
 
 		internal static bool TryGetObjectGetterSetter(Type type, string propertyName, out DynamicObjectGetterSetter? getterSetter)
 		{
 			getterSetter = Cache
 				.GetOrAdd(type, static _ => new(() => new()))
 				.Value
-#if NETSTANDARD2_1
-				.GetOrAdd(propertyName, static (x, t) => CreateLazyGetterSetter(t, x), type)
-#else
-				.GetOrAdd(propertyName, x =>  CreateLazyGetterSetter(type, x))
-#endif
+				// Create key to avoid creating closure for "type" variable 
+				.GetOrAdd(new PropertyKey(propertyName, type), x => CreateLazyGetterSetter(x.Type, x.PropertyName))
 				?.Value;
 
 			return getterSetter != null;
@@ -75,6 +72,34 @@ namespace DynamicNotifyPropertyChanged
 			var lambda = Expression.Lambda<Action<object, object?>>(assign, objectParameter, propertyValueParameter);
 
 			return lambda.Compile();
+		}
+		
+		private readonly struct PropertyKey : IEquatable<PropertyKey>
+		{
+			public PropertyKey(string propertyName, Type type)
+			{
+				PropertyName = propertyName;
+				Type = type;
+			}
+
+			public string PropertyName { get; }
+
+			public Type Type { get; }
+
+			public bool Equals(PropertyKey other)
+			{
+				return PropertyName == other.PropertyName;
+			}
+
+			public override bool Equals(object? obj)
+			{
+				return obj is PropertyKey other && Equals(other);
+			}
+
+			public override int GetHashCode()
+			{
+				return PropertyName.GetHashCode();
+			}
 		}
 	}
 }
