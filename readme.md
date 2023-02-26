@@ -32,31 +32,8 @@ Func<object> DynamicNotifyPropertyChangedClassFactory.CreateTypeFactory(Type typ
 
 Both methods use caching and `Reflection.Emit` internally for [better performance](https://andrewlock.net/benchmarking-4-reflection-methods-for-calling-a-constructor-in-dotnet/#the-results).
 
-## Getting Property Value
-You can get property value by calling:
-```csharp
-T ObjectExtensions.GetPropertyValue<T>(this object source, string propertyName)
-```
-
-Alternatively, you can create `Func` that gets property value from object by calling:
-```csharp
-Func<object, object> TypeExtensions.GetPropertyGetter(this Type type, string propertyName)
-```
-Both methods have `TryGet` pattern alternatives.
-
-## Setting Property Value
-You can set property value by calling:
-```csharp
-void ObjectExtensions.SetPropertyValue<T>(this object source, string propertyName, T value)
-```
-
-Alternatively, you can create `Func` that sets property value on object by calling:
-```csharp
-Action<object, object> TypeExtensions.GetPropertySetter(this Type type, string propertyName)
-```
-Both methods have `TryGet` pattern alternatives.
-
-All methods described above use caching and compiled expressions for better performance.
+## Getting/Setting Property Value
+Use [DynamicPropertyAccess](https://github.com/Feroks/DynamicPropertyAccess) to get or set property values without reflection. 
 
 ## Batch changes
 
