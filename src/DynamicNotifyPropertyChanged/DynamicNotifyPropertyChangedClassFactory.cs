@@ -200,7 +200,6 @@ namespace DynamicNotifyPropertyChanged
 			InitializationCache.Clear();
 			TypeConstructorInfoCache.Clear();
 			TypePropertyInfoCache.Clear();
-			TypeCache.Clear();
 		}
 
 		private static CustomAttributeBuilder CreateCustomAttributeBuilder(DynamicPropertyAttribute attribute)
