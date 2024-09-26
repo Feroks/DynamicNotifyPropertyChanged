@@ -19,7 +19,6 @@ namespace DynamicNotifyPropertyChanged
 	{
 		private const string OnPropertyChangingName = "OnPropertyChanging";
 		private const string OnPropertyChangedName = "OnPropertyChanged";
-		private static readonly DynamicPropertyComparer DynamicPropertyComparer = new();
 		private static readonly DynamicPropertyAttributeComparer DynamicPropertyAttributeComparer = new();
 		private static readonly DynamicPropertyAttributePropertyComparer DynamicPropertyAttributePropertyComparer = new();
 		private static readonly ConcurrentDictionary<string, Lazy<Type>> DynamicTypeCache = new();
@@ -268,8 +267,6 @@ namespace DynamicNotifyPropertyChanged
 		{
 			var sb = new StringBuilder();
 
-			// Apply sort to avoid creating different type with identical properties in different order
-			Array.Sort(properties, DynamicPropertyComparer);
 			for (var i = 0; i < properties.Length; i++)
 			{
 				var property = properties[i];

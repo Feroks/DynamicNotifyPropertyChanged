@@ -280,14 +280,14 @@ namespace DynamicNotifyPropertyChanged.Tests
 		}
 
 		[Fact]
-		public void ReturnedCachedTypeForDifferentlyOrderedProperties()
+		public void ReturnDifferentTypeForDifferentlyOrderedProperties()
 		{
 			var type1 = DynamicNotifyPropertyChangedClassFactory.CreateType(new[] { _property1, _property2 });
 			var type2 = DynamicNotifyPropertyChangedClassFactory.CreateType(new[] { _property2, _property1 });
 
 			type1
 				.Should()
-				.Be(type2);
+				.NotBe(type2);
 		}
 
 		[Fact]
