@@ -4,37 +4,58 @@ on:
   push:
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
+  pull_request:
+    branches: [ master ]
 
 env:
   configuration: Release
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Verify commit exists in origin/master
-        run: |
-          git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-          git branch --remote --contains | grep origin/master
+#      - name: Verify commit exists in origin/master
+#        run: |
+#          git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+#          git branch --remote --contains | grep origin/master
 
       - name: Set VERSION variable from tag
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+        run: echo "VERSION=AAAAA" >> $GITHUB_ENV
 
+      - name: Debug version
+        run: echo $VERSION
+
+      - name: Debug version 2
+        run: echo ${VERSION}
+
+      - name: Debug version 3
+        run: |
+          echo "Version: ${{ env.VERSION }}"
+
+      - name: Set the value
+        id: step_one
+        run: |
+          echo "action_state=yellow" >> $GITHUB_ENV
+      - name: Use the value
+        id: step_two
+        run: |
+         echo "${{ env.action_state }}" # This will output 'yellow'
+        
       - name: Restore
         run: dotnet restore
 
       - name: Build
-        run: dotnet build --no-restore -c ${{ env.configuration }} /p:Version=${VERSION}
+        run: dotnet build --no-restore -c ${{ env.configuration }} /p:Version=${{ env.VERSION }}
 
       - name: Test
-        run: dotnet test --no-build -c ${{ env.configuration }} /p:Version=${VERSION}
+        run: dotnet test --no-build -c ${{ env.configuration }} /p:Version=${{ env.VERSION }}
 
       - name: Pack
-        run: dotnet pack --no-build --output . -c ${{ env.configuration }} /p:Version=${VERSION}
+        run: dotnet pack --no-build --output . -c ${{ env.configuration }} /p:Version=${{ env.VERSION }}
 
-      - name: Push
-        run: dotnet nuget push DynamicNotifyPropertyChanged.${VERSION}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+      #- name: Push
+      #  run: dotnet nuget push DynamicNotifyPropertyChanged.${VERSION}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
